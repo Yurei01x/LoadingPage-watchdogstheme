@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>YUREI0X - Cybersecurity Portfolio</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        background-color: #000000;
+        color: #ffffff;
+        font-family: "Courier New", monospace;
+        overflow: hidden;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+      }
+
+      canvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 1;
+      }
+
+      .content {
+        position: relative;
+        z-index: 2;
+        text-align: center;
+      }
+
+      .title {
+        font-size: 3em;
+        margin-bottom: 2em;
+        letter-spacing: 0.2em;
+      }
+
+      .loading-text {
+        text-align: left;
+        color: #4caf50;
+      }
+
+      .loading-item {
+        margin: 0.5em 0;
+        opacity: 0;
+        transform: translateY(20px);
+        transition: opacity 0.5s, transform 0.5s;
+      }
+
+      .loading-item.visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="networkCanvas"></canvas>
+    <div class="content">
+      <h1 class="title">YUREI0X</h1>
+      <div class="loading-text">
+        <p class="loading-item">Initializing Systems...</p>
+        <p class="loading-item">Security Protocols</p>
+        <p class="loading-item">Network Systems</p>
+        <p class="loading-item">Database Connection</p>
+        <p class="loading-item">Encryption Modules</p>
+      </div>
+    </div>
+
+    <script>
+      const canvas = document.getElementById("networkCanvas");
+      const ctx = canvas.getContext("2d");
+
+      // Set canvas size
+      function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+      resizeCanvas();
+      window.addEventListener("resize", resizeCanvas);
+
+      // Particle class
+      class Particle {
+        constructor() {
+          this.reset();
+        }
+
+        reset() {
+          this.x = Math.random() * canvas.width;
+          this.y = Math.random() * canvas.height;
+          this.vx = (Math.random() - 0.5) * 0.5;
+          this.vy = (Math.random() - 0.5) * 0.5;
+          this.radius = 2;
+        }
+
+        update() {
+          this.x += this.vx;
+          this.y += this.vy;
+
+          // Bounce off edges
+          if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+          if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+        }
+
+        draw() {
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+          ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
+          ctx.fill();
+        }
+      }
+
+      // Create particles
+      const particles = Array(50)
+        .fill()
+        .map(() => new Particle());
+      const connectionDistance = 150; // Maximum distance for connecting particles
+
+      function drawConnections() {
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.15)";
+        ctx.lineWidth = 1;
+
+        for (let i = 0; i < particles.length; i++) {
+          for (let j = i + 1; j < particles.length; j++) {
+            const dx = particles[i].x - particles[j].x;
+            const dy = particles[i].y - particles[j].y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance < connectionDistance) {
+              ctx.beginPath();
+              ctx.moveTo(particles[i].x, particles[i].y);
+              ctx.lineTo(particles[j].x, particles[j].y);
+              ctx.stroke();
+            }
+          }
+        }
+      }
+
+      // Animation loop
+      function animate() {
+        ctx.fillStyle = "rgba(0, 0, 0, 0.1)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Update and draw particles
+        particles.forEach((particle) => {
+          particle.update();
+          particle.draw();
+        });
+
+        // Draw connections
+        drawConnections();
+
+        requestAnimationFrame(animate);
+      }
+
+      // Start animation
+      animate();
+
+      // Loading text animation
+      const loadingItems = document.querySelectorAll(".loading-item");
+      loadingItems.forEach((item, index) => {
+        setTimeout(() => {
+          item.classList.add("visible");
+        }, 1000 + index * 500);
+      });
+
+      // Mouse interaction
+      let mouse = {
+        x: null,
+        y: null,
+        radius: 150,
+      };
+
+      canvas.addEventListener("mousemove", function (event) {
+        mouse.x = event.x;
+        mouse.y = event.y;
+
+        // Affect nearby particles
+        particles.forEach((particle) => {
+          const dx = mouse.x - particle.x;
+          const dy = mouse.y - particle.y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+
+          if (distance < mouse.radius) {
+            particle.vx += dx * 0.002;
+            particle.vy += dy * 0.002;
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
